@@ -692,7 +692,7 @@ template <typename T, typename CACHE_T, int BLOCK_SIZE,
           int NUM_THREADS = 128>
 void paged_attention_v1_launcher(
     torch::Tensor& out, torch::Tensor& query, torch::Tensor& key_cache,
-    torch::Tensor& value_cache, int num_kv_heads, float scale,
+    torch::Tensor& value_cache, torch::Tensor& head_mapping, float scale,
     torch::Tensor& block_tables, torch::Tensor& seq_lens, int max_seq_len,
     const c10::optional<torch::Tensor>& alibi_slopes, float kv_scale,
     const int tp_rank, const int blocksparse_local_blocks,
@@ -719,6 +719,8 @@ void paged_attention_v1_launcher(
   T* query_ptr = reinterpret_cast<T*>(query.data_ptr());
   CACHE_T* key_cache_ptr = reinterpret_cast<CACHE_T*>(key_cache.data_ptr());
   CACHE_T* value_cache_ptr = reinterpret_cast<CACHE_T*>(value_cache.data_ptr());
+  int num_kv_heads = head_mapping.size(0);
+  const int* head_mapping_ptr = reinterpret_cast<const int*>(head_mapping.data_ptr());
   int* block_tables_ptr = block_tables.data_ptr<int>();
   int* seq_lens_ptr = seq_lens.data_ptr<int>();
 
@@ -769,7 +771,8 @@ void paged_attention_v1_launcher(
 #define CALL_V1_LAUNCHER(T, CACHE_T, BLOCK_SIZE, KV_DTYPE, IS_BLOCK_SPARSE)  \
   paged_attention_v1_launcher<T, CACHE_T, BLOCK_SIZE, KV_DTYPE,              \
                               IS_BLOCK_SPARSE>(                              \
-      out, query, key_cache, value_cache, num_kv_heads, scale, block_tables, \
+      out, query, key_cache, value_cache,     head_mapping,                                                            \
+, scale, block_tables, \
       seq_lens, max_seq_len, alibi_slopes, kv_scale, tp_rank,                \
       blocksparse_local_blocks, blocksparse_vert_stride,                     \
       blocksparse_block_size, blocksparse_head_sliding_step);
@@ -809,7 +812,7 @@ void paged_attention_v1(
         key_cache,  // [num_blocks, num_heads, head_size/x, block_size, x]
     torch::Tensor&
         value_cache,   // [num_blocks, num_heads, head_size, block_size]
-    int num_kv_heads,  // [num_heads]
+    torch::Tensor& head_mapping,  // [num_heads]
     float scale,
     torch::Tensor& block_tables,  // [num_seqs, max_num_blocks_per_seq]
     torch::Tensor& seq_lens,      // [num_seqs]
@@ -847,7 +850,7 @@ template <typename T, typename CACHE_T, int BLOCK_SIZE,
 void paged_attention_v2_launcher(
     torch::Tensor& out, torch::Tensor& exp_sums, torch::Tensor& max_logits,
     torch::Tensor& tmp_out, torch::Tensor& query, torch::Tensor& key_cache,
-    torch::Tensor& value_cache, int num_kv_heads, float scale,
+    torch::Tensor& value_cache, torch::Tensor& head_mapping, float scale,
     torch::Tensor& block_tables, torch::Tensor& seq_lens, int max_seq_len,
     const c10::optional<torch::Tensor>& alibi_slopes, float kv_scale,
     const int tp_rank, const int blocksparse_local_blocks,
@@ -877,6 +880,8 @@ void paged_attention_v2_launcher(
   T* query_ptr = reinterpret_cast<T*>(query.data_ptr());
   CACHE_T* key_cache_ptr = reinterpret_cast<CACHE_T*>(key_cache.data_ptr());
   CACHE_T* value_cache_ptr = reinterpret_cast<CACHE_T*>(value_cache.data_ptr());
+  int num_kv_heads = head_mapping.size(0);
+  const int* head_mapping_ptr = reinterpret_cast<const int*>(head_mapping.data_ptr());
   int* block_tables_ptr = block_tables.data_ptr<int>();
   int* seq_lens_ptr = seq_lens.data_ptr<int>();
 
@@ -930,7 +935,7 @@ void paged_attention_v2_launcher(
   paged_attention_v2_launcher<T, CACHE_T, BLOCK_SIZE, KV_DTYPE,               \
                               IS_BLOCK_SPARSE>(                               \
       out, exp_sums, max_logits, tmp_out, query, key_cache, value_cache,      \
-      num_kv_heads, scale, block_tables, seq_lens, max_seq_len, alibi_slopes, \
+      head_mapping, scale, block_tables, seq_lens, max_seq_len, alibi_slopes, \
       kv_scale, tp_rank, blocksparse_local_blocks, blocksparse_vert_stride,   \
       blocksparse_block_size, blocksparse_head_sliding_step);
 
@@ -973,7 +978,7 @@ void paged_attention_v2(
         key_cache,  // [num_blocks, num_heads, head_size/x, block_size, x]
     torch::Tensor&
         value_cache,   // [num_blocks, num_heads, head_size, block_size]
-    int num_kv_heads,  // [num_heads]
+    torch::Tensor& head_mapping,  // [num_heads]
     float scale,
     torch::Tensor& block_tables,  // [num_seqs, max_num_blocks_per_seq]
     torch::Tensor& seq_lens,      // [num_seqs]
