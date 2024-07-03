@@ -771,8 +771,7 @@ void paged_attention_v1_launcher(
 #define CALL_V1_LAUNCHER(T, CACHE_T, BLOCK_SIZE, KV_DTYPE, IS_BLOCK_SPARSE)  \
   paged_attention_v1_launcher<T, CACHE_T, BLOCK_SIZE, KV_DTYPE,              \
                               IS_BLOCK_SPARSE>(                              \
-      out, query, key_cache, value_cache,     head_mapping,                                                            \
-, scale, block_tables, \
+      out, query, key_cache, value_cache, head_mapping, scale, block_tables, \
       seq_lens, max_seq_len, alibi_slopes, kv_scale, tp_rank,                \
       blocksparse_local_blocks, blocksparse_vert_stride,                     \
       blocksparse_block_size, blocksparse_head_sliding_step);
