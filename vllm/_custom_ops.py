@@ -36,7 +36,7 @@ def paged_attention_v1(
     query: torch.Tensor,
     key_cache: torch.Tensor,
     value_cache: torch.Tensor,
-    num_kv_heads: int,
+    head_mapping: torch.Tensor,
     scale: float,
     block_tables: torch.Tensor,
     seq_lens: torch.Tensor,
@@ -52,7 +52,7 @@ def paged_attention_v1(
     blocksparse_head_sliding_step: int = 0,
 ) -> None:
     vllm_ops.paged_attention_v1(
-        out, query, key_cache, value_cache, num_kv_heads, scale, block_tables,
+        out, query, key_cache, value_cache, head_mapping, scale, block_tables,
         seq_lens, block_size, max_seq_len, alibi_slopes, kv_cache_dtype,
         kv_scale, tp_rank, blocksparse_local_blocks, blocksparse_vert_stride,
         blocksparse_block_size, blocksparse_head_sliding_step)
@@ -66,7 +66,7 @@ def paged_attention_v2(
     query: torch.Tensor,
     key_cache: torch.Tensor,
     value_cache: torch.Tensor,
-    num_kv_heads: int,
+    head_mapping: torch.Tensor,
     scale: float,
     block_tables: torch.Tensor,
     seq_lens: torch.Tensor,
@@ -83,7 +83,7 @@ def paged_attention_v2(
 ) -> None:
     vllm_ops.paged_attention_v2(
         out, exp_sum, max_logits, tmp_out, query, key_cache, value_cache,
-        num_kv_heads, scale, block_tables, seq_lens, block_size, max_seq_len,
+        head_mapping, scale, block_tables, seq_lens, block_size, max_seq_len,
         alibi_slopes, kv_cache_dtype, kv_scale, tp_rank,
         blocksparse_local_blocks, blocksparse_vert_stride,
         blocksparse_block_size, blocksparse_head_sliding_step)
