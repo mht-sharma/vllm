@@ -698,7 +698,7 @@ template <typename T, typename CACHE_T, int BLOCK_SIZE,
 #endif
 void paged_attention_v1_launcher(
     torch::Tensor& out, torch::Tensor& query, torch::Tensor& key_cache,
-    torch::Tensor& value_cache, tensor::Tensor& head_mapping, float scale,
+    torch::Tensor& value_cache, torch::Tensor& head_mapping, float scale,
     torch::Tensor& block_tables, torch::Tensor& seq_lens, int max_seq_len,
     const c10::optional<torch::Tensor>& alibi_slopes, float kv_scale,
     const int tp_rank, const int blocksparse_local_blocks,
