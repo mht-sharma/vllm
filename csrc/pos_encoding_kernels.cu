@@ -67,8 +67,6 @@ inline __device__ void apply_rotary_embedding(
 
 template <typename scalar_t, bool IS_NEOX>
 __global__ void rotary_embedding_kernel(
-    const int64_t* __restrict__ positions,  // [batch_size, seq_len] or
-                                            // [num_tokens]
     scalar_t* __restrict__ query,           // [batch_size, seq_len, num_heads,
                                    // head_size] or [num_tokens, num_heads,
                                    // head_size]
