@@ -2,6 +2,6 @@
 -r requirements-common.txt
 
 # Dependencies for AMD GPUs
-ray >= 2.10.0
-pytest-asyncio
-pandas # Required for fp8 linear
+# ray >= 2.10.0
+# pytest-asyncio
+# pandas # Required for fp8 linear

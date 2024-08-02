@@ -4,7 +4,7 @@
 
 void paged_attention_v1(
     torch::Tensor& out, torch::Tensor& query, torch::Tensor& key_cache,
-    torch::Tensor& value_cache, int num_kv_heads, float scale,
+    torch::Tensor& value_cache, torch::Tensor& head_mapping, float scale,
     torch::Tensor& block_tables, torch::Tensor& seq_lens, int block_size,
     int max_seq_len, const c10::optional<torch::Tensor>& alibi_slopes,
     const std::string& kv_cache_dtype, float kv_scale, const int tp_rank,
@@ -14,7 +14,7 @@ void paged_attention_v1(
 void paged_attention_v2(
     torch::Tensor& out, torch::Tensor& exp_sums, torch::Tensor& max_logits,
     torch::Tensor& tmp_out, torch::Tensor& query, torch::Tensor& key_cache,
-    torch::Tensor& value_cache, int num_kv_heads, float scale,
+    torch::Tensor& value_cache, torch::Tensor& head_mapping, float scale,
     torch::Tensor& block_tables, torch::Tensor& seq_lens, int block_size,
     int max_seq_len, const c10::optional<torch::Tensor>& alibi_slopes,
     const std::string& kv_cache_dtype, float kv_scale, const int tp_rank,
@@ -27,9 +27,10 @@ void rms_norm(torch::Tensor& out, torch::Tensor& input, torch::Tensor& weight,
 void fused_add_rms_norm(torch::Tensor& input, torch::Tensor& residual,
                         torch::Tensor& weight, float epsilon);
 
-void rotary_embedding(torch::Tensor& positions, torch::Tensor& query,
+void rotary_embedding(torch::Tensor& query,
                       torch::Tensor& key, int head_size,
-                      torch::Tensor& cos_sin_cache, bool is_neox);
+                      torch::Tensor& cos_cache, torch::Tensor& sin_cache,
+                      bool is_neox);
 
 void batched_rotary_embedding(torch::Tensor& positions, torch::Tensor& query,
                               torch::Tensor& key, int head_size,
