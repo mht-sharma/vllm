@@ -136,7 +136,7 @@ TORCH_LIBRARY_EXPAND(TORCH_EXTENSION_NAME, ops) {
   ops.def(
       "rotary_embedding(Tensor! query,"
       "                 Tensor! key, int head_size,"
-      "                 Tensor cos_sin_cache, bool is_neox) -> ()");
+      "                 Tensor cos_cache, Tensor sin_cache, bool is_neox) -> ()");
   ops.impl("rotary_embedding", torch::kCUDA, &rotary_embedding);
 
   // Apply GPT-NeoX or GPT-J style rotary embedding to query and key

@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from hipbsolidxgemm import hipb_create_extension, hipb_mm
-from rocsolidxgemm import rocb_create_extension, rocb_mm
+# from hipbsolidxgemm import hipb_create_extension, hipb_mm
+# from rocsolidxgemm import rocb_create_extension, rocb_mm
 
 from vllm import _custom_ops as ops
 from vllm.envs import VLLM_USE_ROCM_SKINNY_GEMM
@@ -81,61 +81,61 @@ class TunedGemm:
             return None
 
     def mm(self, inp, weights, bias=None):
-        # F.Linear can take a 3 dimensional input. vllm
-        # uses this for linear units. However, sampler
-        # will use torch.matmul with 2 dimensions only
-        if inp.dim() == 3:
-            try:
-                inp_view = inp.view(-1, inp.size(-1))
-                batched = True
-            except RuntimeError:
-                return F.linear(inp, weights, bias)
-        else:
-            inp_view = inp
-            batched = False
-        if self.extensions_created is False:
-            rocb_create_extension()
-            hipb_create_extension()
-            self.extensions_created = True
-        m = weights.shape[0]
-        n = inp_view.shape[0]
-        k = inp_view.shape[1]
-        use_bias = bias is not None
-        soltype, solidx = self.query_sol(m=m,
-                                         n=n,
-                                         k=k,
-                                         bias=use_bias,
-                                         dtype=inp.dtype)
-        out = self.apply_skinny(m, n, k, inp_view, weights)
-        if out is not None:
-            if batched:
-                out = out.view(inp.shape[0], inp.shape[1], weights.shape[0])
-            if bias is not None:
-                return out + bias
-            return out
-        elif soltype == 1:
-            out = hipb_mm(inp_view, weights.t(), solidx, bias=bias)
-        elif soltype == 2:
-            out = rocb_mm(inp_view, weights.t(), solidx)
-            if bias is not None:
-                out = out + bias
-        else:
-            if (self.save_gemm == 1):
-                self.tuned_df = pd.concat([
-                    self.tuned_df,
-                    pd.DataFrame({
-                        'M': [m],
-                        'N': [n],
-                        'K': [k],
-                        'bias': [bias is not None],
-                        'dtype': [inp.dtype],
-                    })
-                ]).drop_duplicates()
-                self.tuned_df.to_csv(self.untune_path, index=False)
-            return F.linear(inp, weights, bias)
-        if batched:
-            out = out.view(inp.shape[0], inp.shape[1], weights.shape[0])
-        return out
+        # # F.Linear can take a 3 dimensional input. vllm
+        # # uses this for linear units. However, sampler
+        # # will use torch.matmul with 2 dimensions only
+        # if inp.dim() == 3:
+        #     try:
+        #         inp_view = inp.view(-1, inp.size(-1))
+        #         batched = True
+        #     except RuntimeError:
+        #         return F.linear(inp, weights, bias)
+        # else:
+        #     inp_view = inp
+        #     batched = False
+        # if self.extensions_created is False:
+        #     rocb_create_extension()
+        #     hipb_create_extension()
+        #     self.extensions_created = True
+        # m = weights.shape[0]
+        # n = inp_view.shape[0]
+        # k = inp_view.shape[1]
+        # use_bias = bias is not None
+        # soltype, solidx = self.query_sol(m=m,
+        #                                  n=n,
+        #                                  k=k,
+        #                                  bias=use_bias,
+        #                                  dtype=inp.dtype)
+        # out = self.apply_skinny(m, n, k, inp_view, weights)
+        # if out is not None:
+        #     if batched:
+        #         out = out.view(inp.shape[0], inp.shape[1], weights.shape[0])
+        #     if bias is not None:
+        #         return out + bias
+        #     return out
+        # elif soltype == 1:
+        #     out = hipb_mm(inp_view, weights.t(), solidx, bias=bias)
+        # elif soltype == 2:
+        #     out = rocb_mm(inp_view, weights.t(), solidx)
+        #     if bias is not None:
+        #         out = out + bias
+        # else:
+        #     if (self.save_gemm == 1):
+        #         self.tuned_df = pd.concat([
+        #             self.tuned_df,
+        #             pd.DataFrame({
+        #                 'M': [m],
+        #                 'N': [n],
+        #                 'K': [k],
+        #                 'bias': [bias is not None],
+        #                 'dtype': [inp.dtype],
+        #             })
+        #         ]).drop_duplicates()
+        #         self.tuned_df.to_csv(self.untune_path, index=False)
+        #     return F.linear(inp, weights, bias)
+        # if batched:
+        #     out = out.view(inp.shape[0], inp.shape[1], weights.shape[0])
+        return 0
 
 
 tgemm = TunedGemm()
