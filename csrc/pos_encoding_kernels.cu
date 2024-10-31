@@ -80,8 +80,6 @@ __global__ void rotary_embedding_kernel(
     const int num_heads, const int num_kv_heads, const int head_size) {
   // Each thread block is responsible for one token.
   const int token_idx = blockIdx.x;
-  int64_t pos = positions[token_idx];
-  const scalar_t* cache_ptr = cos_sin_cache + pos * rot_dim;
 
   const float* cos_ptr = cos_cache + token_idx * rot_dim;
   const float* sin_ptr = sin_cache + token_idx * rot_dim;
@@ -146,7 +144,7 @@ int num_tokens = query.size(0);
       vllm::rotary_embedding_kernel<scalar_t, true><<<grid, block, 0, stream>>>(
           query.data_ptr<scalar_t>(),
           key.data_ptr<scalar_t>(), cos_cache.data_ptr<float>(),
-          sin_cache.data_ptr<float>(), rot_dim,, rot_dim,
+          sin_cache.data_ptr<float>(), rot_dim,
           query_stride, key_stride, num_heads, num_kv_heads, head_size);
     } else {
       vllm::rotary_embedding_kernel<scalar_t, false>
