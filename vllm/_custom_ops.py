@@ -200,15 +200,15 @@ def paged_attention_rocm(
 
 # pos encoding ops
 def rotary_embedding(
-    positions: torch.Tensor,
     query: torch.Tensor,
     key: torch.Tensor,
     head_size: int,
-    cos_sin_cache: torch.Tensor,
+    cos: torch.Tensor,
+    sin: torch.Tensor,
     is_neox: bool,
 ) -> None:
-    torch.ops._C.rotary_embedding(positions, query, key, head_size,
-                                  cos_sin_cache, is_neox)
+    torch.ops._C.rotary_embedding(query, key, head_size,
+                                  cos, sin, is_neox)
 
 
 def batched_rotary_embedding(positions: torch.Tensor, query: torch.Tensor,
