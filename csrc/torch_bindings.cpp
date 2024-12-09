@@ -136,20 +136,10 @@ TORCH_LIBRARY_EXPAND(TORCH_EXTENSION_NAME, ops) {
   // Rotary embedding
   // Apply GPT-NeoX or GPT-J style rotary embedding to query and key.
   ops.def(
-      "rotary_embedding(Tensor positions, Tensor! query,"
+      "rotary_embedding(Tensor! query,"
       "                 Tensor! key, int head_size,"
-      "                 Tensor cos_sin_cache, bool is_neox) -> ()");
+      "                 Tensor cos_cache, Tensor sin_cache, bool is_neox) -> ()");
   ops.impl("rotary_embedding", torch::kCUDA, &rotary_embedding);
-
-  // Apply GPT-NeoX or GPT-J style rotary embedding to query and key
-  // (supports multiple loras).
-  ops.def(
-      "batched_rotary_embedding(Tensor positions, Tensor! query,"
-      "                         Tensor! key, int head_size,"
-      "                         Tensor cos_sin_cache, bool is_neox,"
-      "                         int rot_dim,"
-      "                         Tensor cos_sin_cache_offsets) -> ()");
-  ops.impl("batched_rotary_embedding", torch::kCUDA, &batched_rotary_embedding);
 
   // Quantization ops
 #ifndef USE_ROCM

@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from hipbsolidxgemm import hipb_create_extension, hipb_mm
-from rocsolidxgemm import rocb_create_extension, rocb_mm
+# from hipbsolidxgemm import hipb_create_extension, hipb_mm
+# from rocsolidxgemm import rocb_create_extension, rocb_mm
 
 from vllm import _custom_ops as ops
 from vllm.envs import VLLM_USE_ROCM_SKINNY_GEMM
